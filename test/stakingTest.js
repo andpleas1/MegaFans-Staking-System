@@ -12,12 +12,9 @@ describe("Staking of one nft", function () {
     /// factories
     const MegaFansNFTFactory = await ethers.getContractFactory("MegaFansNFT");
     const RewardTokenFactory = await ethers.getContractFactory("RewardToken");
-    const StakingSystemFactory = await ethers.getContractFactory(
-      "StakingSystem"
-    );
+    const StakingSystemFactory = await ethers.getContractFactory("StakingSystem");
 
     /// @notice that the nft and the toke are being deployed
-
     const MegaFansNFTContract = await MegaFansNFTFactory.deploy();
     const RewardTokenContract = await RewardTokenFactory.deploy();
 
@@ -33,6 +30,7 @@ describe("Staking of one nft", function () {
 
     // setting approval for all in the nft contract to the staking system contract
     console.log((StakingSystemContract.address, account1, 0));
+
     await expect(
       MegaFansNFTContract.setApprovalForAll(StakingSystemContract.address, true)
     )
@@ -43,11 +41,11 @@ describe("Staking of one nft", function () {
 
     //mint 2 nfts
 
-    await expect(MegaFansNFTContract.safeMint(account1, "ipfs::/test/"))
+    await expect(MegaFansNFTContract.safeMint(account1))
       .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 0);
 
-    await expect(MegaFansNFTContract.safeMint(account1, "ipfs::/test/"))
+    await expect(MegaFansNFTContract.safeMint(account1))
       .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 1);
 
@@ -74,14 +72,11 @@ describe("Staking of one nft", function () {
     // look a way to increase time in this test
 
 
-
     await network.provider.send("evm_increaseTime", [200])
     await network.provider.send("evm_mine")
     
      console.log("Updating reward: ");
      await StakingSystemContract.connect(addr1).updateReward(account1);
-
      await StakingSystemContract.connect(addr1).claimReward(account1);
-
   });
 });
