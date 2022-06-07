@@ -10,7 +10,7 @@ describe("Staking of one nft", function () {
     const account1 = addr1.address;
 
     /// factories
-    const RandomApeFactory = await ethers.getContractFactory("RandomApe");
+    const MegaFansNFTFactory = await ethers.getContractFactory("MegaFansNFT");
     const RewardTokenFactory = await ethers.getContractFactory("RewardToken");
     const StakingSystemFactory = await ethers.getContractFactory(
       "StakingSystem"
@@ -18,37 +18,37 @@ describe("Staking of one nft", function () {
 
     /// @notice that the nft and the toke are being deployed
 
-    const RandomApeContract = await RandomApeFactory.deploy();
+    const MegaFansNFTContract = await MegaFansNFTFactory.deploy();
     const RewardTokenContract = await RewardTokenFactory.deploy();
 
-    await RandomApeContract.deployed();
+    await MegaFansNFTContract.deployed();
     await RewardTokenContract.deployed();
 
     // we use their address as parameters for the Staking system
 
     const StakingSystemContract = await StakingSystemFactory.deploy(
-      RandomApeContract.address,
+      MegaFansNFTContract.address,
       RewardTokenContract.address
     );
 
     // setting approval for all in the nft contract to the staking system contract
     console.log((StakingSystemContract.address, account1, 0));
     await expect(
-      RandomApeContract.setApprovalForAll(StakingSystemContract.address, true)
+      MegaFansNFTContract.setApprovalForAll(StakingSystemContract.address, true)
     )
-      .to.emit(RandomApeContract, "ApprovalForAll")
+      .to.emit(MegaFansNFTContract, "ApprovalForAll")
       .withArgs(deployer, StakingSystemContract.address, true);
 
     console.log("StakingSystem deployed: ", StakingSystemContract.address);
 
     //mint 2 nfts
 
-    await expect(RandomApeContract.safeMint(account1, "ipfs::/test/"))
-      .to.emit(RandomApeContract, "Transfer")
+    await expect(MegaFansNFTContract.safeMint(account1, "ipfs::/test/"))
+      .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 0);
 
-    await expect(RandomApeContract.safeMint(account1, "ipfs::/test/"))
-      .to.emit(RandomApeContract, "Transfer")
+    await expect(MegaFansNFTContract.safeMint(account1, "ipfs::/test/"))
+      .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 1);
 
     await StakingSystemContract.initStaking();
@@ -59,12 +59,12 @@ describe("Staking of one nft", function () {
 
     // we need the staker to setApproval for all to the staking system contract
     await expect(
-      RandomApeContract.connect(addr1).setApprovalForAll(
+      MegaFansNFTContract.connect(addr1).setApprovalForAll(
         StakingSystemContract.address,
         true
       )
     )
-      .to.emit(RandomApeContract, "ApprovalForAll")
+      .to.emit(MegaFansNFTContract, "ApprovalForAll")
       .withArgs(account1, StakingSystemContract.address, true);
 
     await expect(StakingSystemContract.connect(addr1).stake(0))
