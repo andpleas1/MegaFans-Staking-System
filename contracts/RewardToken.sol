@@ -18,6 +18,3 @@ contract RewardToken is ERC20, ERC20Burnable, AccessControl {
         _mint(to, amount);
     }
 }
-
-
-

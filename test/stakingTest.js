@@ -29,7 +29,7 @@ describe("Staking of one nft", function () {
     );
 
     // setting approval for all in the nft contract to the staking system contract
-    console.log((StakingSystemContract.address, account1, 0));
+    console.log((StakingSystemContract.address, account1));
 
     await expect(
       MegaFansNFTContract.setApprovalForAll(StakingSystemContract.address, true)
@@ -40,14 +40,16 @@ describe("Staking of one nft", function () {
     console.log("StakingSystem deployed: ", StakingSystemContract.address);
 
     //mint 2 nfts
+    const tokenURI_1 = "https://opensea-creatures-api.herokuapp.com/api/creature/1";
+    const tokenURI_2 = "https://opensea-creatures-api.herokuapp.com/api/creature/2";
 
-    await expect(MegaFansNFTContract.safeMint(account1))
-      .to.emit(MegaFansNFTContract, "Transfer")
-      .withArgs(nullAddress, account1, 0);
-
-    await expect(MegaFansNFTContract.safeMint(account1))
+    await expect(MegaFansNFTContract.safeMint(account1, tokenURI_1))
       .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 1);
+    
+    await expect(MegaFansNFTContract.safeMint(account1, tokenURI_2))
+      .to.emit(MegaFansNFTContract, "Transfer")
+      .withArgs(nullAddress, account1, 2);
 
     await StakingSystemContract.initStaking();
     await StakingSystemContract.setTokensClaimable(true);
@@ -65,9 +67,9 @@ describe("Staking of one nft", function () {
       .to.emit(MegaFansNFTContract, "ApprovalForAll")
       .withArgs(account1, StakingSystemContract.address, true);
 
-    await expect(StakingSystemContract.connect(addr1).stake(0))
+    await expect(StakingSystemContract.connect(addr1).stake(1))
       .to.emit(StakingSystemContract, "Staked")
-      .withArgs(account1, 0);
+      .withArgs(account1, 1);
 
     // look a way to increase time in this test
 
