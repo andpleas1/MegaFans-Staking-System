@@ -1,5 +1,5 @@
 
-    export const RewardTokenAddress = "0xABd757a1DF6bD378739e415F250EE0bDa6814cB6"
-    export const MegaFansNFTAddress = "0xeB838A7f979446fC631C2c655625E8bfd7601DD2"
-    export const StakingSystemAddress = "0x037031b081aE383595B47052eF8139ecc4F62249"
+    export const RewardTokenAddress = "0x94f44a794206EA02Cad43c167ACBc8F0306823e9"
+    export const MegaFansNFTAddress = "0x1050d0664Fe59ACF098e711E09C314cE937962ba"
+    export const StakingSystemAddress = "0xcdC7b4e5a91a443f3DFb50467629B0AA9E886070"
   
