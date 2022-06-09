@@ -17,30 +17,23 @@ contract StakingSystem is Ownable, ERC721Holder {
     IERC721 public nft;
 
     uint256 public stakedTotal;
-    uint256 public stakingStartTime;
-    uint256 constant stakingTime = 180 seconds;
     uint256 constant token = 10e18;
     
     struct Staker {
         uint256[] tokenIds;
         mapping(uint256 => uint256) tokenStakingCoolDown;
-        uint256 balance;
-        uint256 rewardsReleased;
     }
 
-    constructor(IERC721 _nft, IRewardToken _rewardsToken) {
+    constructor(IERC721 _nft) {
         nft = _nft;
-        rewardsToken = _rewardsToken;
     }
 
     /// @notice mapping of a staker to its wallet
-    mapping(address => Staker) public stakers;
+    mapping(address => Staker) private stakers;
 
     /// @notice Mapping from token ID to owner address
 
     mapping(uint256 => address) public tokenOwner;
-    bool public tokensClaimable;
-    bool initialised;
 
     /// @notice event emitted when a user has staked a nft
 
@@ -58,16 +51,8 @@ contract StakingSystem is Ownable, ERC721Holder {
     /// @notice Emergency unstake tokens without rewards
     event EmergencyUnstake(address indexed user, uint256 tokenId);
 
-    function initStaking() public onlyOwner {
-        //needs access control
-        require(!initialised, "Already initialised");
-        stakingStartTime = block.timestamp;
-        initialised = true;
-    }
-
     function setTokensClaimable(bool _enabled) public onlyOwner {
         //needs access control
-        tokensClaimable = _enabled;
         emit ClaimableStatusUpdated(_enabled);
     }
 
@@ -90,7 +75,6 @@ contract StakingSystem is Ownable, ERC721Holder {
     }
 
     function _stake(address _user, uint256 _tokenId) internal {
-        require(initialised, "Staking System: the staking has not started");
         require(
             nft.ownerOf(_tokenId) == _user,
             "user must be the owner of the token"
@@ -98,7 +82,7 @@ contract StakingSystem is Ownable, ERC721Holder {
         Staker storage staker = stakers[_user];
 
         staker.tokenIds.push(_tokenId);
-        staker.tokenStakingCoolDown[_tokenId] = block.timestamp;
+        // staker.tokenStakingCoolDown[_tokenId] = block.timestamp;
         tokenOwner[_tokenId] = _user;
         nft.approve(address(this), _tokenId);
         nft.safeTransferFrom(_user, address(this), _tokenId);
@@ -108,12 +92,12 @@ contract StakingSystem is Ownable, ERC721Holder {
     }
 
     function unstake(uint256 _tokenId) public {
-        claimReward(msg.sender);
+        // claimReward(msg.sender);
         _unstake(msg.sender, _tokenId);
     }
 
     function unstakeBatch(uint256[] memory tokenIds) public {
-        claimReward(msg.sender);
+        // claimReward(msg.sender);
         for (uint256 i = 0; i < tokenIds.length; i++) {
             if (tokenOwner[tokenIds[i]] == msg.sender) {
                 _unstake(msg.sender, tokenIds[i]);
@@ -144,48 +128,12 @@ contract StakingSystem is Ownable, ERC721Holder {
         if (staker.tokenIds.length > 0) {
             staker.tokenIds.pop();
         }
-        staker.tokenStakingCoolDown[_tokenId] = 0;
+        // staker.tokenStakingCoolDown[_tokenId] = 0;
         delete tokenOwner[_tokenId];
 
         nft.safeTransferFrom(address(this), _user, _tokenId);
 
         emit Unstaked(_user, _tokenId);
         stakedTotal--;
-    }
-
-    function updateReward(address _user) public {
-        
-        Staker storage staker = stakers[_user];
-        uint256[] storage ids = staker.tokenIds;
-        for (uint256 i = 0; i < ids.length; i++) {
-            if (
-                staker.tokenStakingCoolDown[ids[i]] <
-                block.timestamp + stakingTime &&
-                staker.tokenStakingCoolDown[ids[i]] > 0
-            ) {
-            
-                uint256 stakedDays = ((block.timestamp - uint(staker.tokenStakingCoolDown[ids[i]]))) / stakingTime;
-                uint256 partialTime = ((block.timestamp - uint(staker.tokenStakingCoolDown[ids[i]]))) % stakingTime;
-                
-                staker.balance +=  token * stakedDays;
-
-                staker.tokenStakingCoolDown[ids[i]] = block.timestamp + partialTime;
-
-                console.logUint(staker.tokenStakingCoolDown[ids[i]]);
-                console.logUint(staker.balance);
-            }
-        }
-    }
-
-    function claimReward(address _user) public {
-        require(tokensClaimable == true, "Tokens cannnot be claimed yet");
-        require(stakers[_user].balance > 0 , "0 rewards yet");
-
-
-        stakers[_user].rewardsReleased += stakers[_user].balance;
-        stakers[_user].balance = 0;
-        rewardsToken.mint(_user, stakers[_user].balance);
-
-        emit RewardPaid(_user, stakers[_user].balance);
     }
 }

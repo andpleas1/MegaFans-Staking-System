@@ -11,21 +11,21 @@ describe("Staking of one nft", function () {
 
     /// factories
     const MegaFansNFTFactory = await ethers.getContractFactory("MegaFansNFT");
-    const RewardTokenFactory = await ethers.getContractFactory("RewardToken");
+    // const RewardTokenFactory = await ethers.getContractFactory("RewardToken");
     const StakingSystemFactory = await ethers.getContractFactory("StakingSystem");
 
     /// @notice that the nft and the toke are being deployed
     const MegaFansNFTContract = await MegaFansNFTFactory.deploy();
-    const RewardTokenContract = await RewardTokenFactory.deploy();
+    // const RewardTokenContract = await RewardTokenFactory.deploy();
 
     await MegaFansNFTContract.deployed();
-    await RewardTokenContract.deployed();
+    // await RewardTokenContract.deployed();
 
     // we use their address as parameters for the Staking system
 
     const StakingSystemContract = await StakingSystemFactory.deploy(
-      MegaFansNFTContract.address,
-      RewardTokenContract.address
+      MegaFansNFTContract.address
+      // RewardTokenContract.address
     );
 
     // setting approval for all in the nft contract to the staking system contract
@@ -55,15 +55,16 @@ describe("Staking of one nft", function () {
       .withArgs(nullAddress, account1, 2);
 
     expect (await MegaFansNFTContract.tokenURI(2))
-    .to.equal("https://ipfs.moralis.io:2053/ipfs/QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv");
+      .to.equal("https://ipfs.moralis.io:2053/ipfs/QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv");
     
-    await StakingSystemContract.initStaking();
-    await StakingSystemContract.setTokensClaimable(true);
+    // await StakingSystemContract.initStaking();
+    // await StakingSystemContract.setTokensClaimable(true);
 
     //stake 1 token
     // signed by account1\
 
     // we need the staker to setApproval for all to the staking system contract
+    console.log("~~~~~ 1 ~~~~~");
     await expect(
       MegaFansNFTContract.connect(addr1).setApprovalForAll(
         StakingSystemContract.address,
@@ -73,6 +74,7 @@ describe("Staking of one nft", function () {
       .to.emit(MegaFansNFTContract, "ApprovalForAll")
       .withArgs(account1, StakingSystemContract.address, true);
 
+    console.log("~~~~~ 1 ~~~~~");
     await expect(StakingSystemContract.connect(addr1).stake(1))
       .to.emit(StakingSystemContract, "Staked")
       .withArgs(account1, 1);
@@ -80,11 +82,11 @@ describe("Staking of one nft", function () {
     // look a way to increase time in this test
 
 
-    await network.provider.send("evm_increaseTime", [200])
-    await network.provider.send("evm_mine")
+    // await network.provider.send("evm_increaseTime", [200])
+    // await network.provider.send("evm_mine")
     
-     console.log("Updating reward: ");
-     await StakingSystemContract.connect(addr1).updateReward(account1);
-     await StakingSystemContract.connect(addr1).claimReward(account1);
+    //  console.log("Updating reward: ");
+    //  await StakingSystemContract.connect(addr1).updateReward(account1);
+    //  await StakingSystemContract.connect(addr1).claimReward(account1);
   });
 });
