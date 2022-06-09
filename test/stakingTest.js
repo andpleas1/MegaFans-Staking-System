@@ -40,17 +40,23 @@ describe("Staking of one nft", function () {
     console.log("StakingSystem deployed: ", StakingSystemContract.address);
 
     //mint 2 nfts
-    const tokenURI_1 = "https://opensea-creatures-api.herokuapp.com/api/creature/1";
-    const tokenURI_2 = "https://opensea-creatures-api.herokuapp.com/api/creature/2";
+    const tokenURI_1 = "QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv";
+    const tokenURI_2 = "QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv";
 
     await expect(MegaFansNFTContract.safeMint(account1, tokenURI_1))
       .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 1);
+
+    expect (await MegaFansNFTContract.tokenURI(1))
+      .to.equal("https://ipfs.moralis.io:2053/ipfs/QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv");
     
     await expect(MegaFansNFTContract.safeMint(account1, tokenURI_2))
       .to.emit(MegaFansNFTContract, "Transfer")
       .withArgs(nullAddress, account1, 2);
 
+    expect (await MegaFansNFTContract.tokenURI(2))
+    .to.equal("https://ipfs.moralis.io:2053/ipfs/QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv");
+    
     await StakingSystemContract.initStaking();
     await StakingSystemContract.setTokensClaimable(true);
 
