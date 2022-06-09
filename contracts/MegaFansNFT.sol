@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-// import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
@@ -15,13 +14,13 @@ contract MegaFansNFT is ERC721URIStorage, AccessControl {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     Counters.Counter private _tokenIdCounter;
 
-    constructor() ERC721("MegaFans NFT", "RA") {
+    constructor() ERC721 ("MegaFans NFT", "RA") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(MINTER_ROLE, msg.sender);
     }
 
     function _baseURI() internal pure override returns (string memory) {
-        return "ipfs://";
+        return "https://ipfs.moralis.io:2053/ipfs/";
     }
 
     function safeMint(address to, string memory metadataURI) public onlyRole(MINTER_ROLE)
