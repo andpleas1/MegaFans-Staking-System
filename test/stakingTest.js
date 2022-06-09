@@ -64,7 +64,6 @@ describe("Staking of one nft", function () {
     // signed by account1\
 
     // we need the staker to setApproval for all to the staking system contract
-    console.log("~~~~~ 1 ~~~~~");
     await expect(
       MegaFansNFTContract.connect(addr1).setApprovalForAll(
         StakingSystemContract.address,
@@ -74,13 +73,11 @@ describe("Staking of one nft", function () {
       .to.emit(MegaFansNFTContract, "ApprovalForAll")
       .withArgs(account1, StakingSystemContract.address, true);
 
-    console.log("~~~~~ 1 ~~~~~");
     await expect(StakingSystemContract.connect(addr1).stake(1))
       .to.emit(StakingSystemContract, "Staked")
       .withArgs(account1, 1);
 
     // look a way to increase time in this test
-
 
     // await network.provider.send("evm_increaseTime", [200])
     // await network.provider.send("evm_mine")
