@@ -30,10 +30,7 @@ contract MegaFansNFT is ERC721URIStorage, AccessControl {
 
         uint256 tokenId = _tokenIdCounter.current();
         _safeMint(to, tokenId);
-
-        console.log(metadataURI);
         _setTokenURI(tokenId, metadataURI);
-        console.logUint(tokenId);
 
         return tokenId;
     }
@@ -47,6 +44,4 @@ contract MegaFansNFT is ERC721URIStorage, AccessControl {
     {
         return super.supportsInterface(interfaceId);
     }
-
-
 }
