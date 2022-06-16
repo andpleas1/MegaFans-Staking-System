@@ -3,11 +3,12 @@ const { ethers } = require("hardhat");
 
 describe("Staking of one nft", function () {
   it("Should stake an nft and console.log the reward for the first staking cycle", async function () {
-    const [owner, addr1] = await ethers.getSigners();
+    const [owner, addr1, addr2] = await ethers.getSigners();
 
     const deployer = owner.address;
     const nullAddress = "0x0000000000000000000000000000000000000000";
     const account1 = addr1.address;
+    const account2 = addr2.address;
 
     /// factories
     const MegaFansNFTFactory = await ethers.getContractFactory("MegaFansNFT");
@@ -57,9 +58,6 @@ describe("Staking of one nft", function () {
     expect (await MegaFansNFTContract.tokenURI(2))
       .to.equal("https://ipfs.moralis.io:2053/ipfs/QmUsvnnoR3BgKHijhnP1qpKA7godCnBK2g4L5UknBCyiCv");
     
-    // await StakingSystemContract.initStaking();
-    // await StakingSystemContract.setTokensClaimable(true);
-
     //stake 1 token
     // signed by account1\
 
@@ -73,9 +71,23 @@ describe("Staking of one nft", function () {
       .to.emit(MegaFansNFTContract, "ApprovalForAll")
       .withArgs(account1, StakingSystemContract.address, true);
 
+    // Stake and unstake owner account
     await expect(StakingSystemContract.connect(addr1).stake(1))
       .to.emit(StakingSystemContract, "Staked")
       .withArgs(account1, 1);
+
+    await expect(StakingSystemContract.connect(addr1).unstake(1))
+      .to.emit(StakingSystemContract, "Unstaked")
+      .withArgs(account1, 1);
+
+    // Stake with owner account and unstake & transfer to another account
+    await expect(StakingSystemContract.connect(addr1).stake(2))
+      .to.emit(StakingSystemContract, "Staked")
+      .withArgs(account1, 2);
+
+    await expect(StakingSystemContract.connect(addr1).unstaketoAddress(2, account2))
+      .to.emit(StakingSystemContract, "UnstakedToAddress")
+      .withArgs(account1, account2, 2);
 
     // look a way to increase time in this test
 

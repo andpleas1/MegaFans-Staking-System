@@ -32,29 +32,22 @@ contract StakingSystem is Ownable, ERC721Holder {
     mapping(address => Staker) private stakers;
 
     /// @notice Mapping from token ID to owner address
-
     mapping(uint256 => address) public tokenOwner;
 
     /// @notice event emitted when a user has staked a nft
-
     event Staked(address owner, uint256 amount);
 
-    /// @notice event emitted when a user has unstaked a nft
+    /// @notice event emitted when the game creator unstake
     event Unstaked(address owner, uint256 amount);
 
-    /// @notice event emitted when a user claims reward
-    event RewardPaid(address indexed user, uint256 reward);
+    /// @notice event emitted when the Game creator send NFT to winner
+    event UnstakedToAddress(address owner, address to, uint256 amount);
 
-    /// @notice Allows reward tokens to be claimed
-    event ClaimableStatusUpdated(bool status);
-
-    /// @notice Emergency unstake tokens without rewards
-    event EmergencyUnstake(address indexed user, uint256 tokenId);
-
-    function setTokensClaimable(bool _enabled) public onlyOwner {
-        //needs access control
-        emit ClaimableStatusUpdated(_enabled);
-    }
+    // // Define modifier for set the role
+    // modifier serverManager {
+    //     require(msg.sender == gameManager);
+    //     _;
+    // }
 
     function getStakedTokens(address _user)
         public
@@ -92,8 +85,11 @@ contract StakingSystem is Ownable, ERC721Holder {
     }
 
     function unstake(uint256 _tokenId) public {
-        // claimReward(msg.sender);
         _unstake(msg.sender, _tokenId);
+    }
+
+    function unstaketoAddress(uint256 _tokenId, address _to) public {
+        _unstaketoAddress(msg.sender, _to, _tokenId);
     }
 
     function unstakeBatch(uint256[] memory tokenIds) public {
@@ -103,16 +99,6 @@ contract StakingSystem is Ownable, ERC721Holder {
                 _unstake(msg.sender, tokenIds[i]);
             }
         }
-    }
-
-    // Unstake without caring about rewards. EMERGENCY ONLY.
-    function emergencyUnstake(uint256 _tokenId) public {
-        require(
-            tokenOwner[_tokenId] == msg.sender,
-            "nft._unstake: Sender must have staked tokenID"
-        );
-        _unstake(msg.sender, _tokenId);
-        emit EmergencyUnstake(msg.sender, _tokenId);
     }
 
     function _unstake(address _user, uint256 _tokenId) internal {
@@ -134,6 +120,29 @@ contract StakingSystem is Ownable, ERC721Holder {
         nft.safeTransferFrom(address(this), _user, _tokenId);
 
         emit Unstaked(_user, _tokenId);
+        stakedTotal--;
+    }
+
+    
+    function _unstaketoAddress(address _user, address _to, uint256 _tokenId) internal {
+        require(
+            tokenOwner[_tokenId] == _user,
+            "Nft Staking System: user must be the owner of the staked nft"
+        );
+        Staker storage staker = stakers[_user];
+
+        // uint256 lastIndex = staker.tokenIds.length - 1;
+        // uint256 lastIndexKey = staker.tokenIds[lastIndex];
+        
+        if (staker.tokenIds.length > 0) {
+            staker.tokenIds.pop();
+        }
+        // staker.tokenStakingCoolDown[_tokenId] = 0;
+        delete tokenOwner[_tokenId];
+
+        nft.safeTransferFrom(address(this), _to, _tokenId);
+
+        emit UnstakedToAddress(_user, _to, _tokenId);
         stakedTotal--;
     }
 }
